@@ -1,0 +1,68 @@
+{
+    "name": "vue-excel-view",
+    "version": "0.1.0",
+    "private": false,
+    "files": [
+        "lib"
+    ],
+    "main": "lib/vue-excel-view.umd.min.js",
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build",
+        "lib": "vue-cli-service build --target lib --name vue-excel-view --dest lib src/index.js",
+        "lint": "vue-cli-service lint"
+    },
+    "dependencies": {
+        "core-js": "^3.6.5",
+        "element-ui": "2.13.2",
+        "vue": "2.6.10",
+        "xlsx": "^0.16.9"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "4.4.4",
+        "@vue/cli-plugin-eslint": "4.4.4",
+        "@vue/cli-plugin-unit-jest": "4.4.4",
+        "@vue/cli-service": "4.4.4",
+        "@vue/test-utils": "1.0.0-beta.29",
+        "autoprefixer": "9.5.1",
+        "axios": "^0.21.0",
+        "babel-eslint": "10.1.0",
+        "babel-jest": "23.6.0",
+        "babel-plugin-dynamic-import-node": "2.3.3",
+        "eslint": "6.7.2",
+        "eslint-plugin-vue": "6.2.2",
+        "html-webpack-plugin": "3.2.0",
+        "husky": "1.3.1",
+        "less": "^3.12.2",
+        "less-loader": "^7.0.1",
+        "lint-staged": "8.1.5",
+        "mockjs": "1.0.1-beta3",
+        "node-less": "^1.0.0",
+        "sass": "1.26.2",
+        "sass-loader": "8.0.2",
+        "script-ext-html-webpack-plugin": "2.1.3",
+        "serve-static": "1.13.2",
+        "svg-sprite-loader": "4.1.3",
+        "svgo": "1.2.0",
+        "vue-template-compiler": "2.6.10"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential",
+            "eslint:recommended"
+        ],
+        "parserOptions": {
+            "parser": "babel-eslint"
+        },
+        "rules": {}
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not dead"
+    ]
+}
