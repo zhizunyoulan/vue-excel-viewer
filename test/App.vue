@@ -16,26 +16,51 @@
       </div>
     </el-upload>
 
-    <excel-view v-if="file" :file="file" @on-reach-top="reachTop" />
+    <excel-view
+      v-if="file || excelData"
+      :file="file"
+      :excelData="excelData"
+      @on-reach-top="reachTop"
+    />
   </div>
 </template>
 
 <script>
 import ExcelView from "../src/components/ExcelView/index";
 import axios from "axios";
-axios.defaults.withCredentials = true
+axios.defaults.withCredentials = true;
 export default {
   name: "App",
   components: {
     ExcelView,
   },
   created() {
+    // axios
+    //   .request({
+    //     url: "http://127.0.0.1:8090/excel/part?fileId=6",
+    //   })
+    //   .then((res) => {
+    //     console.info("res", res);
+    //   })
+    //   .catch((error) => {
+    //     console.error("error", error);
+    //   });
+
     axios
-      .request({
-        url: "http://127.0.0.1:8090/excel/part?fileId=8",
+      .get("http://127.0.0.1:8090/excel/part?fileId=6", {
+        responseType: "blob",
       })
       .then((res) => {
-        console.info("res", res);
+        // console.info("res", res);
+        let blob = res.data;
+        let reader = new FileReader();
+        var that = this;
+
+        reader.onload = (e) => {
+          that.excelData = e.target.result;
+        };
+
+        reader.readAsBinaryString(blob);
       })
       .catch((error) => {
         console.error("error", error);
@@ -44,11 +69,12 @@ export default {
   data() {
     return {
       file: null,
+      excelData: null,
     };
   },
   methods: {
     reachTop() {
-      alert("reach top");
+      // alert("reach top");
     },
     httpRequest(param) {
       console.info("param", param);
