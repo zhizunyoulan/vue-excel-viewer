@@ -8,6 +8,9 @@ import 'element-ui/lib/theme-chalk/index.css';
 
 Vue.use(Element)
 
+import VueExcelView from '@/index.js'
+Vue.use(VueExcelView)
+
 
 Vue.config.productionTip = false
 
