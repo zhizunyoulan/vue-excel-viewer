@@ -17,7 +17,7 @@
 
     <excel-view
       ref="excelView"
-      :height="900"
+      :height="700"
       @on-reach-top="reachTop"
       @on-reach-bottom="reachBottom"
       @on-row-select="onRowSelect"
@@ -40,10 +40,11 @@ export default {
   },
   created() {
     axios
-      .get("http://127.0.0.1:8090/excel/part?fileId=2&start=0&end=10", {
+      .get("http://127.0.0.1:8090/excel/part?fileId=8&start=0&end=20", {
         responseType: "blob",
       })
       .then((res) => {
+        console.info('res',res)
         let blob = res.data;
         let reader = new FileReader();
         var that = this;
@@ -69,7 +70,7 @@ export default {
     },
     afterOpen(){
       console.info("excel 打开完毕");
-      alert('打开完毕')
+      // alert('打开完毕')
     },
     onRowSelect(index){
       console.info("row select", index);
