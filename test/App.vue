@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <!-- <el-upload
+    <el-upload
       class="upload-demo"
       drag
       action="http://127.0.0.1:8090/upload/excel"
@@ -13,7 +13,7 @@
       <div class="el-upload__tip" slot="tip">
         只能上传jpg/png文件，且不超过500kb
       </div>
-    </el-upload> -->
+    </el-upload>
 
     <excel-view
       ref="excelView"
@@ -38,52 +38,49 @@ export default {
   components: {
     // ExcelView,
   },
-  created() {
-    axios
-      .get("http://127.0.0.1:8090/excel/part?fileId=8&start=0&end=20", {
-        responseType: "blob",
-      })
-      .then((res) => {
-        console.info('res',res)
-        let blob = res.data;
-        let reader = new FileReader();
-        var that = this;
+  // created() {
+  //   axios
+  //     .get("http://127.0.0.1:8090/excel/part?fileId=3&start=0&end=20", {
+  //       responseType: "blob",
+  //     })
+  //     .then((res) => {
+  //       console.info('res',res)
+  //       let blob = res.data;
+  //       let reader = new FileReader();
+  //       var that = this;
 
-        reader.onload = (e) => {
-          that.$refs.excelView.openExcelData(e.target.result)
-        };
+  //       reader.onload = (e) => {
+  //         that.$refs.excelView.openExcelData(e.target.result)
+  //       };
 
-        reader.readAsBinaryString(blob);
-      })
-      .catch((error) => {
-        console.error("error", error);
-      });
-  },
+  //       reader.readAsBinaryString(blob);
+  //     })
+  //     .catch((error) => {
+  //       console.error("error", error);
+  //     });
+  // },
   data() {
-    return {
-
-    };
+    return {};
   },
   methods: {
-    beforeOpen(){
+    beforeOpen() {
       console.info("excel 准备打开");
     },
-    afterOpen(){
+    afterOpen() {
       console.info("excel 打开完毕");
       // alert('打开完毕')
     },
-    onRowSelect(index){
-      console.info("row select", index);
+    onRowSelect(index, selectRowValues) {
+      console.info("row select", index, selectRowValues);
     },
-    onColSelect(index){
+    onColSelect(index) {
       console.info("col select", index);
     },
-    onCellSelect(rowIndex, colIndex, value){
-      console.info("cell select", rowIndex, colIndex, value);
-      if(value) {
-        console.info("cell value", value);
-      }else{
-        console.info("cell value empty");
+    onCellSelect(rowIndex, colIndex, value) {
+      if (value) {
+        console.info("cell select", rowIndex, colIndex, value);
+      } else {
+        console.info("cell select， value empty", rowIndex, colIndex);
       }
     },
     reachTop() {
@@ -94,7 +91,7 @@ export default {
     },
     httpRequest(param) {
       console.info("param", param);
-      this.file = param.file;
+      this.$refs.excelView.openExcelFile(param.file);
     },
     onUploadSuccess(response, file, fileList) {
       console.info("res", response, file, fileList);

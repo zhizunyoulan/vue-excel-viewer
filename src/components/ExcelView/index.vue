@@ -1,32 +1,21 @@
 <template>
-  <el-container>
-    <!-- <el-header>
-
-    </el-header> -->
-    <el-main>
-      <el-scrollbar ref="excelPanel" :style="{ height: height + 'px' }">
-        <table
-          class="excel-table"
-          cellspacing="0"
-          cellpadding="0"
-          v-on:click="excelClick"
-        >
-          <thead></thead>
-          <tbody></tbody>
-        </table>
-      </el-scrollbar>
-    </el-main>
-  </el-container>
-
-  <!-- <ul
-    class="infinite-list"
-    
-    v-infinite-scroll="reachBottom"
-    style="overflow: auto"
-    :style="{ height: height + 'px' }"
-  >
-    
-  </ul> -->
+  <div class="excel-panel">
+    <el-scrollbar
+      ref="excelPanel"
+      class="excel-panel"
+      :style="{ height: height + 'px' }"
+    >
+      <table
+        class="excel-table"
+        cellspacing="0"
+        cellpadding="0"
+        v-on:click="excelClick"
+      >
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </el-scrollbar>
+  </div>
 </template>
 
 <script>
@@ -59,7 +48,7 @@ function transformMerges(merges) {
   return mergesObj;
 }
 
-function renderSheetAt(domElement, maxRowRange, dataArray, merges) {
+function renderSheetAt(domElement, maxRowRange, dataArray, merges, firstRowIndex) {
   var tableHeadElement = domElement.querySelector("thead");
   var emptyTh = document.createElement("th");
   tableHeadElement.appendChild(emptyTh);
@@ -119,27 +108,24 @@ function renderSheetAt(domElement, maxRowRange, dataArray, merges) {
   }
 }
 
-function renderWorkbookSheet(workbook, sheetName) {
+function renderWorkbookSheet(workbook, sheetName, firstRowIndex) {
   var worksheet = workbook.Sheets[sheetName];
-  // console.info("renderWorkbookSheet", worksheet);
+  console.info("renderWorkbookSheet", worksheet);
   var defaultRange = worksheet["!ref"];
   var lastCellPosition = defaultRange.split(":")[1];
   var lastCellPositionMatchInfo = lastCellPosition.match(/(\D+)(\d+)/);
   // console.info("lastCellPositionMatchInfo", lastCellPositionMatchInfo);
-  var range = "A1:" + lastCellPositionMatchInfo[1] + 10;
   var merges = worksheet["!merges"];
-  console.info("range", range, merges);
   var sheetDatas = XLSX.utils.sheet_to_json(worksheet, {
     raw: false,
     header: 1,
-    range: range,
   });
   // console.info("workbook sheet data", sheetDatas);
   var tableElement = document.querySelector(".excel-table");
 
   var maxRowRange = parseCharsTo10(lastCellPositionMatchInfo[1]);
   // console.info("maxRowRange", maxRowRange);
-  renderSheetAt(tableElement, maxRowRange, sheetDatas, transformMerges(merges));
+  renderSheetAt(tableElement, maxRowRange, sheetDatas, transformMerges(merges), firstRowIndex);
 }
 
 function parseNumToChars(num) {
@@ -191,6 +177,7 @@ export default {
   automount: true,
   data() {
     return {
+      isOpened: false,
       isScrollAtTop: true,
       isScrollAtBottom: false,
     };
@@ -203,7 +190,9 @@ export default {
   },
   mounted() {
     var that = this;
-    document.querySelector(".el-scrollbar__wrap").onscroll = function (e) {
+    document.querySelector(
+      ".excel-panel .el-scrollbar__wrap"
+    ).onscroll = function (e) {
       var scrollTop = e.target.scrollTop;
 
       if (scrollTop == 0) {
@@ -225,19 +214,6 @@ export default {
         }
       }
     };
-
-    // this.$refs.excelPanel.onscroll = function (e) {
-    //   console.info("scroll", e.target);
-    //   var scrollTop = e.target.scrollTop;
-    //   if (scrollTop == 0) {
-    //     if (!this.isScrollAtTop) {
-    //       that.$emit("on-reach-top");
-    //     }
-    //     this.isScrollAtTop = true;
-    //   } else {
-    //     this.isScrollAtTop = false;
-    //   }
-    // };
   },
   methods: {
     excelClick(e) {
@@ -265,14 +241,20 @@ export default {
         });
         target.classList.add("selected");
         var rowIndex = target.getAttribute("row-index");
+
+        var selectRowValues = [];
         document
           .querySelectorAll(".excel-cell.excel-cell-row-" + rowIndex)
           .forEach((ele) => {
+            var colIndex = ele.getAttribute("col-index");
+            if (!isNaN(colIndex)) {
+              selectRowValues[colIndex] = ele.innerText;
+            }
             ele.classList.add("selected");
             ele.classList.add("selected-row");
           });
 
-        this.$emit("on-row-select", rowIndex);
+        this.$emit("on-row-select", rowIndex, selectRowValues);
       } else if (target.classList.contains("excel-cell")) {
         document.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
@@ -294,45 +276,53 @@ export default {
         this.$emit("on-cell-select", rowIndex, colIndex, target.innerText);
       }
     },
-    openExcelFile(file) {
-      this.$emit("on-before-open");
-      var that = this;
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const data = e.target.result;
-        console.info("start read workbook");
+    openExcelFile(file, firstRowIndex) {
+      if (!this.isOpened) {
+        this.isOpened = true;
+
+        this.$emit("on-before-open");
+        var that = this;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const data = e.target.result;
+          console.info("start read workbook");
+          var workbook = XLSX.read(data, {
+            type: "binary",
+          });
+          var sheetName = workbook.SheetNames[0];
+          if (sheetName) {
+            renderWorkbookSheet(workbook, sheetName, firstRowIndex);
+            that.$emit("on-after-open");
+          }
+        };
+        reader.readAsBinaryString(file);
+      } else {
+        throw "excel-view 不能重复打开";
+      }
+    },
+    openExcelData(data, firstRowIndex) {
+      if (!this.isOpened) {
+        this.isOpened = true;
+        this.$emit("on-before-open");
+        var that = this;
         var workbook = XLSX.read(data, {
           type: "binary",
         });
         var sheetName = workbook.SheetNames[0];
         if (sheetName) {
-          renderWorkbookSheet(workbook, sheetName);
+          renderWorkbookSheet(workbook, sheetName, firstRowIndex);
           that.$emit("on-after-open");
         }
-      };
-      reader.readAsBinaryString(file);
-    },
-    openExcelData(data) {
-      this.$emit("on-before-open");
-      var that = this;
-      var workbook = XLSX.read(data, {
-        type: "binary",
-      });
-      var sheetName = workbook.SheetNames[0];
-      if (sheetName) {
-        renderWorkbookSheet(workbook, sheetName);
-        that.$emit("on-after-open");
+      } else {
+        throw "excel-view 不能重复打开";
       }
-    },
-    reachBottom() {
-      this.$emit("on-reach-bottom");
     },
   },
 };
 </script>
 
 <style lang="scss">
-.excel-table {
+.excel-panel .excel-table {
   // font-size: 1.2em;
   border-collapse: collapse;
   user-select: none;
@@ -357,7 +347,7 @@ export default {
 
     th.excel-head-th.selected::after {
       content: "";
-      background-color: #42A642;
+      background-color: #42a642;
       position: absolute;
       left: 0;
       bottom: 0;
@@ -389,7 +379,7 @@ export default {
 
     .excel-left-num.selected::after {
       content: "";
-      background-color: #42A642;
+      background-color: #42a642;
       position: absolute;
       top: 0;
       right: 0;
@@ -403,22 +393,22 @@ export default {
     }
 
     .excel-cell.selected-row {
-      border-top: 2px solid #42A642;
-      border-bottom: 2px solid #42A642;
+      border-top: 2px solid #42a642;
+      border-bottom: 2px solid #42a642;
       background-color: #e8e8e8;
     }
     .excel-cell.selected-col {
-      border-left: 2px solid #42A642;
-      border-right: 2px solid #42A642;
+      border-left: 2px solid #42a642;
+      border-right: 2px solid #42a642;
       background-color: #e8e8e8;
     }
 
     .excel-cell.selected:not(.selected-row):not(.selected-col) {
-      border: 2px solid #42A642;
+      border: 2px solid #42a642;
     }
 
     .excel-cell.active {
-      border: 2px solid #42A642;
+      border: 2px solid #42a642;
     }
   }
 }
