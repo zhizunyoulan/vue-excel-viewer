@@ -18,6 +18,8 @@
     <excel-view
       ref="excelView"
       :height="700"
+      :first-row-index="firstRowIndex"
+      :min-col-counts="5"
       @on-reach-top="reachTop"
       @on-reach-bottom="reachBottom"
       @on-row-select="onRowSelect"
@@ -60,7 +62,9 @@ export default {
   //     });
   // },
   data() {
-    return {};
+    return {
+      firstRowIndex: 2
+    };
   },
   methods: {
     beforeOpen() {

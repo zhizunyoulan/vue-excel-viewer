@@ -48,46 +48,53 @@ function transformMerges(merges) {
   return mergesObj;
 }
 
-function renderSheetAt(domElement, maxRowRange, dataArray, merges, firstRowIndex) {
+function renderSheetAt(domElement, maxColRange, dataArray, merges, firstRowIndex) {
   var tableHeadElement = domElement.querySelector("thead");
   var emptyTh = document.createElement("th");
   tableHeadElement.appendChild(emptyTh);
-  for (var i = 0; i < maxRowRange; i++) {
+  for (var i = 0; i < maxColRange; i++) {
+    var colNum = i + 1;
     var sign = parseNumToChars(i);
     var th = document.createElement("th");
     th.classList.add("excel-head-th");
-    th.classList.add("excel-cell-col-" + (i + 1));
-    th.setAttribute("col-index", i + 1);
+    th.classList.add("excel-cell-col-" + colNum);
+    th.setAttribute("col-num", colNum);
     th.setAttribute("col-sign", sign);
     th.innerText = sign;
     tableHeadElement.appendChild(th);
   }
   var tableBodyElement = domElement.querySelector("tbody");
   var invalidCells = {};
-  for (var ri = 0; ri < dataArray.length; ri++) {
+  if(isNaN(firstRowIndex) || firstRowIndex < 0) {
+    firstRowIndex = 0;
+  }
+  // console.info('firstRowIndex',firstRowIndex)
+  for (var ri = firstRowIndex; ri < dataArray.length; ri++) {
+    var rowNum = ri + 1;
     var row = dataArray[ri];
     var tr = document.createElement("tr");
+    tr.setAttribute("row-num", rowNum);
     tr.classList.add("excel-row");
     var emptyTd = document.createElement("td");
     emptyTd.classList.add("excel-left-num");
-    var rowIndex = ri + 1;
-    emptyTd.classList.add("excel-cell-row-" + rowIndex);
+    
+    emptyTd.classList.add("excel-cell-row-" + rowNum);
 
-    emptyTd.setAttribute("row-index", rowIndex);
-    emptyTd.innerText = rowIndex;
+    emptyTd.setAttribute("row-num", rowNum);
+    emptyTd.innerText = rowNum;
     tr.appendChild(emptyTd);
-    for (var ci = 0; ci < maxRowRange; ci++) {
-      var colIndex = ci + 1;
+    for (var ci = 0; ci < maxColRange; ci++) {
+      var colNum = ci + 1;
       var cellKey = ri + "-" + ci;
       // debugger
       // console.info(cellKey, invalidCells[cellKey]);
       if (!invalidCells[cellKey]) {
         var td = document.createElement("td");
         td.classList.add("excel-cell");
-        td.setAttribute("row-index", rowIndex);
-        td.setAttribute("col-index", colIndex);
-        td.classList.add("excel-cell-col-" + colIndex);
-        td.classList.add("excel-cell-row-" + rowIndex);
+        td.setAttribute("row-num", rowNum);
+        td.setAttribute("col-num", colNum);
+        td.classList.add("excel-cell-col-" + colNum);
+        td.classList.add("excel-cell-row-" + rowNum);
         var cellValue = row[ci];
         td.innerText = cellValue || "";
         var merge = merges[cellKey];
@@ -108,9 +115,9 @@ function renderSheetAt(domElement, maxRowRange, dataArray, merges, firstRowIndex
   }
 }
 
-function renderWorkbookSheet(workbook, sheetName, firstRowIndex) {
+function renderWorkbookSheet(workbook, sheetName, firstRowIndex, minColCounts) {
   var worksheet = workbook.Sheets[sheetName];
-  console.info("renderWorkbookSheet", worksheet);
+  // console.info("renderWorkbookSheet", worksheet);
   var defaultRange = worksheet["!ref"];
   var lastCellPosition = defaultRange.split(":")[1];
   var lastCellPositionMatchInfo = lastCellPosition.match(/(\D+)(\d+)/);
@@ -123,9 +130,12 @@ function renderWorkbookSheet(workbook, sheetName, firstRowIndex) {
   // console.info("workbook sheet data", sheetDatas);
   var tableElement = document.querySelector(".excel-table");
 
-  var maxRowRange = parseCharsTo10(lastCellPositionMatchInfo[1]);
-  // console.info("maxRowRange", maxRowRange);
-  renderSheetAt(tableElement, maxRowRange, sheetDatas, transformMerges(merges), firstRowIndex);
+  var maxColRange = parseCharsTo10(lastCellPositionMatchInfo[1]);
+  if(!isNaN(minColCounts) && minColCounts > maxColRange) {
+    maxColRange = minColCounts;
+  }
+  // console.info("maxColRange", maxColRange);
+  renderSheetAt(tableElement, maxColRange, sheetDatas, transformMerges(merges), firstRowIndex);
 }
 
 function parseNumToChars(num) {
@@ -187,6 +197,12 @@ export default {
       type: Number,
       default: 500,
     },
+    firstRowIndex: {
+      type: Number
+    },
+    minColCounts: {
+      type: Number
+    }
   },
   mounted() {
     var that = this;
@@ -225,14 +241,14 @@ export default {
           ele.classList.remove("selected-row");
         });
         target.classList.add("selected");
-        var colIndex = target.getAttribute("col-index");
+        var colNum = target.getAttribute("col-num");
         document
-          .querySelectorAll(".excel-cell.excel-cell-col-" + colIndex)
+          .querySelectorAll(".excel-cell.excel-cell-col-" + colNum)
           .forEach((ele) => {
             ele.classList.add("selected");
             ele.classList.add("selected-col");
           });
-        this.$emit("on-col-select", colIndex);
+        this.$emit("on-col-select", colNum);
       } else if (target.classList.contains("excel-left-num")) {
         document.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
@@ -240,21 +256,21 @@ export default {
           ele.classList.remove("selected-row");
         });
         target.classList.add("selected");
-        var rowIndex = target.getAttribute("row-index");
+        var rowNum = target.getAttribute("row-num");
 
         var selectRowValues = [];
         document
-          .querySelectorAll(".excel-cell.excel-cell-row-" + rowIndex)
+          .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
           .forEach((ele) => {
-            var colIndex = ele.getAttribute("col-index");
-            if (!isNaN(colIndex)) {
-              selectRowValues[colIndex] = ele.innerText;
+            var colNum = ele.getAttribute("col-num");
+            if (!isNaN(colNum)) {
+              selectRowValues[colNum] = ele.innerText;
             }
             ele.classList.add("selected");
             ele.classList.add("selected-row");
           });
 
-        this.$emit("on-row-select", rowIndex, selectRowValues);
+        this.$emit("on-row-select", rowNum, selectRowValues);
       } else if (target.classList.contains("excel-cell")) {
         document.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
@@ -263,20 +279,20 @@ export default {
         });
 
         target.classList.add("selected");
-        var rowIndex = target.getAttribute("row-index");
-        var colIndex = target.getAttribute("col-index");
+        var rowNum = target.getAttribute("row-num");
+        var colNum = target.getAttribute("col-num");
 
         document
-          .querySelector("th.excel-cell-col-" + colIndex)
+          .querySelector("th.excel-cell-col-" + colNum)
           .classList.add("selected");
         document
-          .querySelector("td.excel-cell-row-" + rowIndex)
+          .querySelector("td.excel-cell-row-" + rowNum)
           .classList.add("selected");
 
-        this.$emit("on-cell-select", rowIndex, colIndex, target.innerText);
+        this.$emit("on-cell-select", rowNum, colNum, target.innerText);
       }
     },
-    openExcelFile(file, firstRowIndex) {
+    openExcelFile(file) {
       if (!this.isOpened) {
         this.isOpened = true;
 
@@ -285,13 +301,13 @@ export default {
         const reader = new FileReader();
         reader.onload = function (e) {
           const data = e.target.result;
-          console.info("start read workbook");
+          // console.info("start read workbook");
           var workbook = XLSX.read(data, {
             type: "binary",
           });
           var sheetName = workbook.SheetNames[0];
           if (sheetName) {
-            renderWorkbookSheet(workbook, sheetName, firstRowIndex);
+            renderWorkbookSheet(workbook, sheetName, that.firstRowIndex, that.minColCounts);
             that.$emit("on-after-open");
           }
         };
@@ -300,7 +316,7 @@ export default {
         throw "excel-view 不能重复打开";
       }
     },
-    openExcelData(data, firstRowIndex) {
+    openExcelData(data,) {
       if (!this.isOpened) {
         this.isOpened = true;
         this.$emit("on-before-open");
@@ -310,7 +326,7 @@ export default {
         });
         var sheetName = workbook.SheetNames[0];
         if (sheetName) {
-          renderWorkbookSheet(workbook, sheetName, firstRowIndex);
+          renderWorkbookSheet(workbook, sheetName, that.firstRowIndex, that.minColCounts);
           that.$emit("on-after-open");
         }
       } else {
@@ -390,6 +406,7 @@ export default {
     .excel-cell {
       border: 1px solid #d4d4d4;
       white-space: nowrap;
+      width: 50px;
     }
 
     .excel-cell.selected-row {
