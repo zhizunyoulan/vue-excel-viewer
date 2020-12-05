@@ -1,25 +1,13 @@
 <template>
   <div id="app">
-    <el-upload
-      class="upload-demo"
-      drag
-      action="http://127.0.0.1:8090/upload/excel"
-      :with-credentials="true"
-      :on-success="onUploadSuccess"
-      :http-request="httpRequest"
-    >
-      <i class="el-icon-upload"></i>
-      <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-      <div class="el-upload__tip" slot="tip">
-        只能上传jpg/png文件，且不超过500kb
-      </div>
-    </el-upload>
+    <input @change="choose" type="file"/>
 
     <excel-view
       ref="excelView"
-      :height="700"
+      :height="300"
       :first-row-index="firstRowIndex"
       :min-col-counts="5"
+      :border-collapse="false"
       @on-reach-top="reachTop"
       @on-reach-bottom="reachBottom"
       @on-row-select="onRowSelect"
@@ -32,55 +20,39 @@
 </template>
 
 <script>
-// import ExcelView from "../src/components/ExcelView/index";
-import axios from "axios";
-axios.defaults.withCredentials = true;
+
 export default {
   name: "App",
-  components: {
-    // ExcelView,
-  },
-  // created() {
-  //   axios
-  //     .get("http://127.0.0.1:8090/excel/part?fileId=3&start=0&end=20", {
-  //       responseType: "blob",
-  //     })
-  //     .then((res) => {
-  //       console.info('res',res)
-  //       let blob = res.data;
-  //       let reader = new FileReader();
-  //       var that = this;
-
-  //       reader.onload = (e) => {
-  //         that.$refs.excelView.openExcelData(e.target.result)
-  //       };
-
-  //       reader.readAsBinaryString(blob);
-  //     })
-  //     .catch((error) => {
-  //       console.error("error", error);
-  //     });
-  // },
   data() {
     return {
       firstRowIndex: 2
     };
   },
   methods: {
+    choose(e){
+      console.info("excel 准备打开", e);
+      console.info("param", e.target.files);
+      this.$refs.excelView.openExcelFile(e.target.files[0]);
+    },
     beforeOpen() {
       console.info("excel 准备打开");
+      
     },
     afterOpen() {
       console.info("excel 打开完毕");
-      // alert('打开完毕')
+      this.$refs.excelView.setRowBackgroundColor(5,'red');
     },
     onRowSelect(index, selectRowValues) {
       console.info("row select", index, selectRowValues);
+      this.$refs.excelView.setSelectedBackgroundColor('red');
     },
     onColSelect(index) {
       console.info("col select", index);
     },
     onCellSelect(rowIndex, colIndex, value) {
+      // this.$refs.excelView.setCellBackgroundColor(rowIndex, colIndex, 'red');
+      this.$refs.excelView.freezeCellAt(rowIndex, colIndex);
+
       if (value) {
         console.info("cell select", rowIndex, colIndex, value);
       } else {

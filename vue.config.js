@@ -24,31 +24,43 @@ module.exports = {
 
     chainWebpack(config) {
         // set svg-sprite-loader
-        config.module
-            .rule("svg")
-            .exclude.add(resolve("src/icons"))
-            .end();
-        config.module
-            .rule("icons")
-            .test(/\.svg$/)
-            .include.add(resolve("src/icons"))
-            .end()
-            .use("svg-sprite-loader")
-            .loader("svg-sprite-loader")
-            .options({
-                symbolId: "icon-[name]",
-            })
-            .end();
 
-        config.when(process.env.NODE_ENV == "development", (config) => {
-            config
-                .plugin("ScriptExtHtmlWebpackPlugin")
-                .after("html")
-                .use("script-ext-html-webpack-plugin", [{
-                    // `runtime` must same as runtimeChunk name. default is `runtime`
-                    inline: /runtime\..*\.js$/,
-                }, ])
-                .end();
-        });
+        config.module
+            .rule('image')
+            .test(/\.ico$/)
+            .use('url-loader')
+            .loader('url-loader')
+            config.module
+            .rule('image')
+            .test(/\.cur$/)
+            .use('url-loader')
+            .loader('url-loader')
+
+        // config.module
+        //     .rule("svg")
+        //     .exclude.add(resolve("src/icons"))
+        //     .end();
+        // config.module
+        //     .rule("icons")
+        //     .test(/\.svg$/)
+        //     .include.add(resolve("src/icons"))
+        //     .end()
+        //     .use("svg-sprite-loader")
+        //     .loader("svg-sprite-loader")
+        //     .options({
+        //         symbolId: "icon-[name]",
+        //     })
+        //     .end();
+
+        // config.when(process.env.NODE_ENV == "development", (config) => {
+        //     config
+        //         .plugin("ScriptExtHtmlWebpackPlugin")
+        //         .after("html")
+        //         .use("script-ext-html-webpack-plugin", [{
+        //             // `runtime` must same as runtimeChunk name. default is `runtime`
+        //             inline: /runtime\..*\.js$/,
+        //         }, ])
+        //         .end();
+        // });
     },
 };
