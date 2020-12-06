@@ -201,7 +201,7 @@ function parseCharsTo10(value) {
 }
 
 export default {
-  name: "ExcelView",
+  name: "ExcelViewer",
   automount: true,
   data() {
     return {
@@ -285,45 +285,18 @@ export default {
     },
     freezeCellAt(rowNum, colNum) {
       document.querySelectorAll(".freeze").forEach((cellEle) => {
-        
         cellEle.classList.remove("freeze");
-        var sColNum = cellEle.getAttribute('col-num');
-        var sRowNum = cellEle.getAttribute('row-num');
-        
+        var sColNum = cellEle.getAttribute("col-num");
+        var sRowNum = cellEle.getAttribute("row-num");
+
         if (cellEle.classList.contains("excel-head-th")) {
-          
-          // if(parseInt(sColNum) < colNum) {
-          //   cellEle.style.zIndex = 1001;
-          //   console.info("zIndex", sRowNum, sColNum, 1001);
-          // }else{
-          //   cellEle.style.zIndex = 1000;
-          //   console.info("zIndex", sRowNum, sColNum, 1000);
-          // }
           cellEle.style.zIndex = 1000;
           cellEle.style.left = "";
-        }else if (cellEle.classList.contains("excel-left-num")) {
-          
-          // if(parseInt(sRowNum) < rowNum) {
-          //   cellEle.style.zIndex = 1001;
-          //   console.info("zIndex", sRowNum, sColNum, 1001);
-          // }else {
-          //   cellEle.style.zIndex = 1000;
-          //   console.info("zIndex", sRowNum, sColNum, 1000);
-          // }
+        } else if (cellEle.classList.contains("excel-left-num")) {
           cellEle.style.zIndex = 1000;
           cellEle.style.top = "";
-        }else{
-          // if(parseInt(sRowNum) < rowNum && parseInt(sColNum) < colNum) {
-          //   cellEle.style.zIndex = 999;
-          //   console.info("zIndex", sRowNum, sColNum, 999);
-          // }else if(parseInt(sRowNum) < rowNum || parseInt(sColNum) < colNum) {
-          //   cellEle.style.zIndex = 998;
-          //   console.info("zIndex", sRowNum, sColNum, 998);
-          // }else{
-          //   cellEle.style.zIndex = '';
-          //   console.info("zIndex", sRowNum, sColNum, '');
-          // }
-          cellEle.style.zIndex = '';
+        } else {
+          cellEle.style.zIndex = "";
           cellEle.style.top = "";
           cellEle.style.left = "";
         }
@@ -334,17 +307,16 @@ export default {
         var cellEle = document.querySelector(
           ".excel-cell.excel-cell-row-" + ri + ".excel-cell-col-" + colNum
         );
-        console.info('zindex',cellEle.style.zIndex)
+        // console.info('zindex',cellEle.style.zIndex)
         var boundingClientRect = cellEle.getBoundingClientRect();
 
         document
           .querySelectorAll(".excel-cell-row-" + ri)
           .forEach((cellEle) => {
-            if(cellEle.classList.contains("excel-left-num")) {
+            if (cellEle.classList.contains("excel-left-num")) {
               cellEle.style.zIndex = 1001;
-              console.info("row zIndex", ri, cellEle, 1001);
+              // console.info("row zIndex", ri, cellEle, 1001);
             }
-
 
             cellEle.classList.add("freeze");
             cellEle.style.top = top + "px";
@@ -352,9 +324,9 @@ export default {
         top += boundingClientRect.height;
       }
 
-      var left = 29;
+      var left = 34;
       for (var ci = 1; ci < colNum; ci++) {
-        console.info("col freeze", ci, left);
+        // console.info("col freeze", ci, left);
         var cellEle = document.querySelector(
           ".excel-cell.excel-cell-row-" + rowNum + ".excel-cell-col-" + ci
         );
@@ -362,14 +334,11 @@ export default {
         document
           .querySelectorAll(".excel-cell-col-" + ci)
           .forEach((cellEle) => {
-            if(cellEle.classList.contains("excel-head-th")) {
+            if (cellEle.classList.contains("excel-head-th")) {
               cellEle.style.zIndex = 1001;
-              console.info("col zIndex", ci, cellEle, 1000);
             }
             if (cellEle.style.top && cellEle.style.top.length > 0) {
               cellEle.style.zIndex = 999;
-            } else {
-              console.info("top:", cellEle.style.top);
             }
             cellEle.classList.add("freeze");
             cellEle.style.left = left + "px";
@@ -495,19 +464,6 @@ export default {
 </script>
 
 <style lang="scss">
-// .excel-panel .excel-table.open::after {
-//   content: "";
-//   position: absolute;
-//   background-color: #e8e8e8;
-//   background-image: url("~@/assets/angle.png");
-//   background-repeat: no-repeat;
-//   background-size: 100% 100%;
-//   height: 25px;
-//   width: 34px;
-//   top: 30px;
-//   display: block;
-//   z-index: 2000;
-// }
 
 .excel-panel .excel-table {
   // font-size: 1.2em;
@@ -524,13 +480,24 @@ export default {
       height: 25px;
 
       th.excel-angle {
-        background-image: url("~@/assets/angle.png");
+        background-color: #e8e8e8;
         background-repeat: no-repeat;
         background-size: 100% 100%;
         position: sticky;
         top: 0;
         left: 0;
         z-index: 1001;
+      }
+      th.excel-angle::after {
+        content: "";
+        position: sticky;
+        display: block;
+        width: 0;
+        height: 0;
+        left: 11px;
+        top: 7px;
+        border-bottom: 15px solid #B8B8B8;
+        border-left: 20px solid transparent;
       }
       th.excel-head-th {
         position: sticky;

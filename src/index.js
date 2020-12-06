@@ -1,7 +1,7 @@
+//components
 const components = []
 const _getModuleFrom = (root, path) => require('@/' + root + '/' + path + '.vue')
 
-    //components
 const componentPaths = require.context('@/components', true, /\.vue$/).keys().map(i => {
     return i.match(/\.\/(.*)\.vue/)[1]
 })

@@ -2,8 +2,8 @@
   <div id="app">
     <input @change="choose" type="file"/>
 
-    <excel-view
-      ref="excelView"
+    <excel-viewer
+      ref="excelViewer"
       :height="300"
       :first-row-index="firstRowIndex"
       :min-col-counts="5"
@@ -32,7 +32,7 @@ export default {
     choose(e){
       console.info("excel 准备打开", e);
       console.info("param", e.target.files);
-      this.$refs.excelView.openExcelFile(e.target.files[0]);
+      this.$refs.excelViewer.openExcelFile(e.target.files[0]);
     },
     beforeOpen() {
       console.info("excel 准备打开");
@@ -40,18 +40,18 @@ export default {
     },
     afterOpen() {
       console.info("excel 打开完毕");
-      this.$refs.excelView.setRowBackgroundColor(5,'red');
+      this.$refs.excelViewer.setRowBackgroundColor(5,'red');
     },
     onRowSelect(index, selectRowValues) {
       console.info("row select", index, selectRowValues);
-      this.$refs.excelView.setSelectedBackgroundColor('red');
+      this.$refs.excelViewer.setSelectedBackgroundColor('red');
     },
     onColSelect(index) {
       console.info("col select", index);
     },
     onCellSelect(rowIndex, colIndex, value) {
-      // this.$refs.excelView.setCellBackgroundColor(rowIndex, colIndex, 'red');
-      this.$refs.excelView.freezeCellAt(rowIndex, colIndex);
+      // this.$refs.excelViewer.setCellBackgroundColor(rowIndex, colIndex, 'red');
+      // this.$refs.excelViewer.freezeCellAt(rowIndex, colIndex);
 
       if (value) {
         console.info("cell select", rowIndex, colIndex, value);
@@ -67,7 +67,7 @@ export default {
     },
     httpRequest(param) {
       console.info("param", param);
-      this.$refs.excelView.openExcelFile(param.file);
+      this.$refs.excelViewer.openExcelFile(param.file);
     },
     onUploadSuccess(response, file, fileList) {
       console.info("res", response, file, fileList);

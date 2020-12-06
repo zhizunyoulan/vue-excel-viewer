@@ -1,15 +1,14 @@
 {
-    "name": "vue-excel-view",
+    "name": "@uublue/vue-excel-viewer",
     "version": "0.1.1",
     "private": false,
     "files": [
         "lib"
     ],
-    "main": "lib/vue-excel-view.umd.min.js",
+    "main": "lib/vue-excel-viewer.umd.min.js",
     "scripts": {
         "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
-        "lib": "vue-cli-service build --target lib --name vue-excel-view --dest lib src/index.js",
+        "lib": "vue-cli-service build --target lib --name vue-excel-viewer --dest lib src/index.js",
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
