@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <input @change="choose" type="file"/>
+    <input @change="chooseFile" type="file"/>
 
     <excel-viewer
       ref="excelViewer"
@@ -29,49 +29,44 @@ export default {
     };
   },
   methods: {
-    choose(e){
-      console.info("excel 准备打开", e);
-      console.info("param", e.target.files);
+    chooseFile(e){
+      console.info("excel file select", e);
+      //open excel file
       this.$refs.excelViewer.openExcelFile(e.target.files[0]);
     },
-    beforeOpen() {
-      console.info("excel 准备打开");
+    beforeOpen() {//文件打开前的事件 on before open
+      console.info("excel before open");
       
     },
-    afterOpen() {
-      console.info("excel 打开完毕");
+    afterOpen() {//文件打开后的事件 on after open
+      console.info("excel after open");
       this.$refs.excelViewer.setRowBackgroundColor(5,'red');
     },
-    onRowSelect(index, selectRowValues) {
+    onRowSelect(index, selectRowValues) {//行选择的事件 on row select
       console.info("row select", index, selectRowValues);
+      //设置行的背景颜色 set row background-color
       this.$refs.excelViewer.setSelectedBackgroundColor('red');
     },
-    onColSelect(index) {
+    onColSelect(index) {//列选择事件 on column select
       console.info("col select", index);
     },
-    onCellSelect(rowIndex, colIndex, value) {
+    onCellSelect(rowIndex, colIndex, value) {//单元格选择的事件 on cell select
+      //设置背景颜色 set backgroundColor 
       this.$refs.excelViewer.setCellBackgroundColor(rowIndex, colIndex, 'red');
-      // this.$refs.excelViewer.freezeCellAt(rowIndex, colIndex);
-
+      //冻结窗格 freeze at cell
+      this.$refs.excelViewer.freezeCellAt(rowIndex, colIndex);
       if (value) {
         console.info("cell select", rowIndex, colIndex, value);
       } else {
         console.info("cell select， value empty", rowIndex, colIndex);
       }
     },
-    reachTop() {
+    reachTop() {//滚动到顶部的事件 on reach top
       console.info("touch top");
     },
-    reachBottom() {
+    reachBottom() {//滚动到底部的事件 on reach bottom
       console.info("touch bottom");
-    },
-    httpRequest(param) {
-      console.info("param", param);
-      this.$refs.excelViewer.openExcelFile(param.file);
-    },
-    onUploadSuccess(response, file, fileList) {
-      console.info("res", response, file, fileList);
-    },
+    }
   },
 };
 </script>
