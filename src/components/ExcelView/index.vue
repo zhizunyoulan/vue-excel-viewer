@@ -284,14 +284,47 @@ export default {
       }
     },
     freezeCellAt(rowNum, colNum) {
-      document.querySelectorAll(".excel-cell.freeze").forEach((cellEle) => {
-        // console.info("ele", cellEle);
+      document.querySelectorAll(".freeze").forEach((cellEle) => {
+        
         cellEle.classList.remove("freeze");
-        if (!cellEle.classList.contains("excel-head-th")) {
+        var sColNum = cellEle.getAttribute('col-num');
+        var sRowNum = cellEle.getAttribute('row-num');
+        
+        if (cellEle.classList.contains("excel-head-th")) {
+          
+          // if(parseInt(sColNum) < colNum) {
+          //   cellEle.style.zIndex = 1001;
+          //   console.info("zIndex", sRowNum, sColNum, 1001);
+          // }else{
+          //   cellEle.style.zIndex = 1000;
+          //   console.info("zIndex", sRowNum, sColNum, 1000);
+          // }
+          cellEle.style.zIndex = 1000;
+          cellEle.style.left = "";
+        }else if (cellEle.classList.contains("excel-left-num")) {
+          
+          // if(parseInt(sRowNum) < rowNum) {
+          //   cellEle.style.zIndex = 1001;
+          //   console.info("zIndex", sRowNum, sColNum, 1001);
+          // }else {
+          //   cellEle.style.zIndex = 1000;
+          //   console.info("zIndex", sRowNum, sColNum, 1000);
+          // }
+          cellEle.style.zIndex = 1000;
           cellEle.style.top = "";
-        }
-
-        if (!cellEle.classList.contains("excel-left-num")) {
+        }else{
+          // if(parseInt(sRowNum) < rowNum && parseInt(sColNum) < colNum) {
+          //   cellEle.style.zIndex = 999;
+          //   console.info("zIndex", sRowNum, sColNum, 999);
+          // }else if(parseInt(sRowNum) < rowNum || parseInt(sColNum) < colNum) {
+          //   cellEle.style.zIndex = 998;
+          //   console.info("zIndex", sRowNum, sColNum, 998);
+          // }else{
+          //   cellEle.style.zIndex = '';
+          //   console.info("zIndex", sRowNum, sColNum, '');
+          // }
+          cellEle.style.zIndex = '';
+          cellEle.style.top = "";
           cellEle.style.left = "";
         }
       });
@@ -301,11 +334,18 @@ export default {
         var cellEle = document.querySelector(
           ".excel-cell.excel-cell-row-" + ri + ".excel-cell-col-" + colNum
         );
+        console.info('zindex',cellEle.style.zIndex)
         var boundingClientRect = cellEle.getBoundingClientRect();
 
         document
           .querySelectorAll(".excel-cell-row-" + ri)
           .forEach((cellEle) => {
+            if(cellEle.classList.contains("excel-left-num")) {
+              cellEle.style.zIndex = 1001;
+              console.info("row zIndex", ri, cellEle, 1001);
+            }
+
+
             cellEle.classList.add("freeze");
             cellEle.style.top = top + "px";
           });
@@ -322,6 +362,10 @@ export default {
         document
           .querySelectorAll(".excel-cell-col-" + ci)
           .forEach((cellEle) => {
+            if(cellEle.classList.contains("excel-head-th")) {
+              cellEle.style.zIndex = 1001;
+              console.info("col zIndex", ci, cellEle, 1000);
+            }
             if (cellEle.style.top && cellEle.style.top.length > 0) {
               cellEle.style.zIndex = 999;
             } else {
@@ -451,19 +495,19 @@ export default {
 </script>
 
 <style lang="scss">
-.excel-panel .excel-table.open::after {
-  content: "";
-  position: absolute;
-  background-color: #e8e8e8;
-  background-image: url("~@/assets/angle.png");
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  height: 25px;
-  width: 34px;
-  top: 30px;
-  display: block;
-  z-index: 2000;
-}
+// .excel-panel .excel-table.open::after {
+//   content: "";
+//   position: absolute;
+//   background-color: #e8e8e8;
+//   background-image: url("~@/assets/angle.png");
+//   background-repeat: no-repeat;
+//   background-size: 100% 100%;
+//   height: 25px;
+//   width: 34px;
+//   top: 30px;
+//   display: block;
+//   z-index: 2000;
+// }
 
 .excel-panel .excel-table {
   // font-size: 1.2em;
@@ -483,6 +527,10 @@ export default {
         background-image: url("~@/assets/angle.png");
         background-repeat: no-repeat;
         background-size: 100% 100%;
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 1001;
       }
       th.excel-head-th {
         position: sticky;
