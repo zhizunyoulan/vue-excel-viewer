@@ -50,7 +50,7 @@ export default {
       console.info("col select", index);
     },
     onCellSelect(rowIndex, colIndex, value) {
-      // this.$refs.excelViewer.setCellBackgroundColor(rowIndex, colIndex, 'red');
+      this.$refs.excelViewer.setCellBackgroundColor(rowIndex, colIndex, 'red');
       // this.$refs.excelViewer.freezeCellAt(rowIndex, colIndex);
 
       if (value) {
