@@ -50,15 +50,19 @@ export default {
     onColSelect(index) {//列选择事件 on column select
       console.info("col select", index);
     },
-    onCellSelect(rowIndex, colIndex, value) {//单元格选择的事件 on cell select
+    onCellSelect(rowNum, colNum, value) {//单元格选择的事件 on cell select
       //设置背景颜色 set backgroundColor 
-      this.$refs.excelViewer.setCellBackgroundColor(rowIndex, colIndex, 'red');
+      // this.$refs.excelViewer.setCellBackgroundColor(rowNum, colNum, 'red');
+
+      var rowValues = this.$refs.excelViewer.getRow(rowNum);
+      console.info('rowValues', rowValues)
+
       //冻结窗格 freeze at cell
-      this.$refs.excelViewer.freezeCellAt(rowIndex, colIndex);
+      // this.$refs.excelViewer.freezeCellAt(rowNum, colNum);
       if (value) {
-        console.info("cell select", rowIndex, colIndex, value);
+        console.info("cell select", rowNum, colNum, value);
       } else {
-        console.info("cell select， value empty", rowIndex, colIndex);
+        console.info("cell select， value empty", rowNum, colNum);
       }
     },
     reachTop() {//滚动到顶部的事件 on reach top

@@ -215,7 +215,7 @@ export default {
   },
   props: {
     height: {
-      type: Number,
+      type: Number | String,
       default: 500,
     },
     firstRowIndex: {
@@ -256,6 +256,18 @@ export default {
     };
   },
   methods: {
+    getRow(rowNum){
+      var rowValues = [];
+        document
+          .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
+          .forEach((ele) => {
+            var colNum = ele.getAttribute("col-num");
+            if (!isNaN(colNum)) {
+              rowValues[colNum] = ele.innerText;
+            }
+          });
+      return rowValues;
+    },
     setSelectedBackgroundColor(backgroundColor) {
       document.querySelectorAll(".background-color-set").forEach((ele) => {
         ele.style.backgroundColor = "white";
