@@ -210,7 +210,7 @@ export default {
       isScrollAtTop: true,
       isScrollAtBottom: false,
       maxColNum: 30,
-      maxRowNum: 50,
+      maxRowNum: 50
     };
   },
   props: {
@@ -258,7 +258,7 @@ export default {
   methods: {
     setSelectedBackgroundColor(backgroundColor) {
       document.querySelectorAll(".background-color-set").forEach((ele) => {
-        ele.style.backgroundColor = "inherit";
+        ele.style.backgroundColor = "white";
         ele.classList.remove("background-color-set");
       });
       document.querySelectorAll(".excel-cell.selected").forEach((ele) => {
@@ -484,6 +484,7 @@ export default {
         background-repeat: no-repeat;
         background-size: 100% 100%;
         position: sticky;
+        width: 34px;
         top: 0;
         left: 0;
         z-index: 1001;

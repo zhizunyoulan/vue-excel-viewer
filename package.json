@@ -1,6 +1,6 @@
 {
     "name": "@uublue/vue-excel-viewer",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "private": false,
     "files": [
         "lib"
