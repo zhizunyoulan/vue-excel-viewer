@@ -4,7 +4,7 @@
 
     <excel-viewer
       ref="excelViewer"
-      :height="300"
+      :height="500"
       :first-row-index="firstRowIndex"
       :min-col-counts="5"
       :border-collapse="false"
@@ -41,6 +41,7 @@ export default {
     afterOpen() {//文件打开后的事件 on after open
       console.info("excel after open");
       this.$refs.excelViewer.setRowBackgroundColor(5,'red');
+      this.$refs.excelViewer.freezeCellAt(5, 2);
     },
     onRowSelect(index, selectRowValues) {//行选择的事件 on row select
       console.info("row select", index, selectRowValues);
@@ -54,11 +55,14 @@ export default {
       //设置背景颜色 set backgroundColor 
       // this.$refs.excelViewer.setCellBackgroundColor(rowNum, colNum, 'red');
 
-      var rowValues = this.$refs.excelViewer.getRow(rowNum);
+      var rowValues = this.$refs.excelViewer.getRowValues(rowNum);
       console.info('rowValues', rowValues)
 
+      var cellValue = this.$refs.excelViewer.getCellValue(rowNum, colNum);
+      console.info('cellValue', cellValue)
+
       //冻结窗格 freeze at cell
-      // this.$refs.excelViewer.freezeCellAt(rowNum, colNum);
+      // 
       if (value) {
         console.info("cell select", rowNum, colNum, value);
       } else {

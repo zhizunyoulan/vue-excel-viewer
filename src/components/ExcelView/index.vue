@@ -1,8 +1,9 @@
 <template>
   <div
     class="excel-panel"
+    ref="excelPanel"
     style="overflow: auto"
-    :style="{ height: height + 'px' }"
+    :style="{ height: panelHeight }"
   >
     <table
       class="excel-table"
@@ -22,6 +23,7 @@
 
 <script>
 import XLSX from "xlsx";
+var excelPanel;
 
 function transformMerges(merges) {
   var mergesObj = {};
@@ -140,7 +142,7 @@ function renderWorkbookSheet(workbook, sheetName, firstRowIndex, minColCounts) {
     header: 1,
   });
   // console.info("workbook sheet data", sheetDatas);
-  var tableElement = document.querySelector(".excel-table");
+  var tableElement = excelPanel.querySelector(".excel-table");
 
   var maxColRange = parseCharsTo10(lastCellPositionMatchInfo[1]);
   if (!isNaN(minColCounts) && minColCounts > maxColRange) {
@@ -229,10 +231,20 @@ export default {
       default: false,
     },
   },
-  computed: {},
+  computed: {
+    panelHeight: function(){
+      if(isNaN(this.height)) {
+        return this.height;
+      }else{
+        return this.height + 'px'
+      }
+    }
+  },
   mounted() {
+    excelPanel = this.$refs.excelPanel;
+    console.info('excelPanel', excelPanel)
     var that = this;
-    document.querySelector(".excel-panel").onscroll = function (e) {
+    excelPanel.onscroll = function (e) {
       var scrollTop = e.target.scrollTop;
 
       if (scrollTop == 0) {
@@ -256,9 +268,17 @@ export default {
     };
   },
   methods: {
-    getRow(rowNum){
+    getCellValue(rowNum, colNum){
+      var cellEle = excelPanel.querySelector(
+        ".excel-cell.excel-cell-row-" + rowNum + ".excel-cell-col-" + colNum
+      );
+      if(cellEle) {
+        return cellEle.innerText;
+      }
+    },
+    getRowValues(rowNum){
       var rowValues = [];
-        document
+        excelPanel
           .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
           .forEach((ele) => {
             var colNum = ele.getAttribute("col-num");
@@ -269,17 +289,17 @@ export default {
       return rowValues;
     },
     setSelectedBackgroundColor(backgroundColor) {
-      document.querySelectorAll(".background-color-set").forEach((ele) => {
+      excelPanel.querySelectorAll(".background-color-set").forEach((ele) => {
         ele.style.backgroundColor = "white";
         ele.classList.remove("background-color-set");
       });
-      document.querySelectorAll(".excel-cell.selected").forEach((ele) => {
+      excelPanel.querySelectorAll(".excel-cell.selected").forEach((ele) => {
         ele.style.backgroundColor = backgroundColor;
         ele.classList.add("background-color-set");
       });
     },
     setRowBackgroundColor(rowNum, backgroundColor) {
-      document
+      excelPanel
         .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
         .forEach((ele) => {
           ele.style.backgroundColor = backgroundColor;
@@ -287,7 +307,7 @@ export default {
         });
     },
     setCellBackgroundColor(rowNum, colNum, backgroundColor) {
-      var cellEle = document.querySelector(
+      var cellEle = excelPanel.querySelector(
         ".excel-cell.excel-cell-row-" + rowNum + ".excel-cell-col-" + colNum
       );
       if (cellEle) {
@@ -296,7 +316,7 @@ export default {
       }
     },
     freezeCellAt(rowNum, colNum) {
-      document.querySelectorAll(".freeze").forEach((cellEle) => {
+      excelPanel.querySelectorAll(".freeze").forEach((cellEle) => {
         cellEle.classList.remove("freeze");
         var sColNum = cellEle.getAttribute("col-num");
         var sRowNum = cellEle.getAttribute("row-num");
@@ -316,13 +336,13 @@ export default {
 
       var top = 25;
       for (var ri = (this.firstRowIndex || 0) + 1; ri < rowNum; ri++) {
-        var cellEle = document.querySelector(
+        var cellEle = excelPanel.querySelector(
           ".excel-cell.excel-cell-row-" + ri + ".excel-cell-col-" + colNum
         );
         // console.info('zindex',cellEle.style.zIndex)
         var boundingClientRect = cellEle.getBoundingClientRect();
 
-        document
+        excelPanel
           .querySelectorAll(".excel-cell-row-" + ri)
           .forEach((cellEle) => {
             if (cellEle.classList.contains("excel-left-num")) {
@@ -339,11 +359,11 @@ export default {
       var left = 34;
       for (var ci = 1; ci < colNum; ci++) {
         // console.info("col freeze", ci, left);
-        var cellEle = document.querySelector(
+        var cellEle = excelPanel.querySelector(
           ".excel-cell.excel-cell-row-" + rowNum + ".excel-cell-col-" + ci
         );
         var boundingClientRect = cellEle.getBoundingClientRect();
-        document
+        excelPanel
           .querySelectorAll(".excel-cell-col-" + ci)
           .forEach((cellEle) => {
             if (cellEle.classList.contains("excel-head-th")) {
@@ -361,14 +381,14 @@ export default {
     excelClick(e) {
       var target = e.target;
       if (target.classList.contains("excel-head-th")) {
-        document.querySelectorAll(".selected").forEach((ele) => {
+        excelPanel.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
           ele.classList.remove("selected-col");
           ele.classList.remove("selected-row");
         });
         target.classList.add("selected");
         var colNum = target.getAttribute("col-num");
-        document
+        excelPanel
           .querySelectorAll(".excel-cell.excel-cell-col-" + colNum)
           .forEach((ele) => {
             ele.classList.add("selected");
@@ -376,7 +396,7 @@ export default {
           });
         this.$emit("on-col-select", colNum);
       } else if (target.classList.contains("excel-left-num")) {
-        document.querySelectorAll(".selected").forEach((ele) => {
+        excelPanel.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
           ele.classList.remove("selected-col");
           ele.classList.remove("selected-row");
@@ -385,7 +405,7 @@ export default {
         var rowNum = target.getAttribute("row-num");
 
         var selectRowValues = [];
-        document
+        excelPanel
           .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
           .forEach((ele) => {
             var colNum = ele.getAttribute("col-num");
@@ -398,7 +418,7 @@ export default {
 
         this.$emit("on-row-select", rowNum, selectRowValues);
       } else if (target.classList.contains("excel-cell")) {
-        document.querySelectorAll(".selected").forEach((ele) => {
+        excelPanel.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
           ele.classList.remove("selected-col");
           ele.classList.remove("selected-row");
@@ -408,10 +428,10 @@ export default {
         var rowNum = target.getAttribute("row-num");
         var colNum = target.getAttribute("col-num");
 
-        document
+        excelPanel
           .querySelector("th.excel-cell-col-" + colNum)
           .classList.add("selected");
-        document
+        excelPanel
           .querySelector("td.excel-cell-row-" + rowNum)
           .classList.add("selected");
 
@@ -507,7 +527,7 @@ export default {
         display: block;
         width: 0;
         height: 0;
-        left: 11px;
+        left: 8px;
         top: 7px;
         border-bottom: 15px solid #B8B8B8;
         border-left: 20px solid transparent;
@@ -595,19 +615,19 @@ export default {
 
     .excel-cell.selected:not(.selected-row):not(.selected-col) {
       border: 2px solid #42a642;
-      position: relative;
+      // position: relative;
     }
 
-    .excel-cell.selected:not(.selected-row):not(.selected-col)::after {
-      content: "";
-      background-color: #42a642;
-      display: block;
-      position: absolute;
-      right: -4px;
-      bottom: -4px;
-      width: 6px;
-      height: 6px;
-    }
+    // .excel-cell.selected:not(.selected-row):not(.selected-col)::after {
+    //   content: "";
+    //   background-color: #42a642;
+    //   display: block;
+    //   position: absolute;
+    //   right: -4px;
+    //   bottom: -4px;
+    //   width: 6px;
+    //   height: 6px;
+    // }
 
     .excel-cell.active {
       border: 2px solid #42a642;
