@@ -569,6 +569,7 @@ export default {
       background-color: #e8e8e8;
       background-clip: padding-box;
       text-align: center;
+      white-space: nowrap;
       justify-content: space-around;
       align-items: center;
       padding-left: 5px;
