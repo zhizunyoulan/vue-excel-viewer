@@ -23,7 +23,6 @@
 
 <script>
 import XLSX from "xlsx";
-var excelPanel;
 
 function transformMerges(merges) {
   var mergesObj = {};
@@ -129,35 +128,6 @@ function renderSheetAt(
   }
 }
 
-function renderWorkbookSheet(workbook, sheetName, firstRowIndex, minColCounts) {
-  var worksheet = workbook.Sheets[sheetName];
-  // console.info("renderWorkbookSheet", worksheet);
-  var defaultRange = worksheet["!ref"];
-  var lastCellPosition = defaultRange.split(":")[1];
-  var lastCellPositionMatchInfo = lastCellPosition.match(/(\D+)(\d+)/);
-  // console.info("lastCellPositionMatchInfo", lastCellPositionMatchInfo);
-  var merges = worksheet["!merges"];
-  var sheetDatas = XLSX.utils.sheet_to_json(worksheet, {
-    raw: false,
-    header: 1,
-  });
-  // console.info("workbook sheet data", sheetDatas);
-  var tableElement = excelPanel.querySelector(".excel-table");
-
-  var maxColRange = parseCharsTo10(lastCellPositionMatchInfo[1]);
-  if (!isNaN(minColCounts) && minColCounts > maxColRange) {
-    maxColRange = minColCounts;
-  }
-  // console.info("maxColRange", maxColRange);
-  renderSheetAt(
-    tableElement,
-    maxColRange,
-    sheetDatas,
-    transformMerges(merges),
-    firstRowIndex
-  );
-}
-
 function parseNumToChars(num) {
   var numBy26Array = [];
   function divide26(num) {
@@ -207,12 +177,13 @@ export default {
   automount: true,
   data() {
     return {
+      excelPanel: null,
       isOpened: false,
       show: false,
       isScrollAtTop: true,
       isScrollAtBottom: false,
       maxColNum: 30,
-      maxRowNum: 50
+      maxRowNum: 50,
     };
   },
   props: {
@@ -232,19 +203,19 @@ export default {
     },
   },
   computed: {
-    panelHeight: function(){
-      if(isNaN(this.height)) {
+    panelHeight: function () {
+      if (isNaN(this.height)) {
         return this.height;
-      }else{
-        return this.height + 'px'
+      } else {
+        return this.height + "px";
       }
-    }
+    },
   },
   mounted() {
-    excelPanel = this.$refs.excelPanel;
-    console.info('excelPanel', excelPanel)
+    this.excelPanel = this.$refs.excelPanel;
+    // console.info("excelPanel", this.excelPanel);
     var that = this;
-    excelPanel.onscroll = function (e) {
+    this.excelPanel.onscroll = function (e) {
       var scrollTop = e.target.scrollTop;
 
       if (scrollTop == 0) {
@@ -268,38 +239,42 @@ export default {
     };
   },
   methods: {
-    getCellValue(rowNum, colNum){
-      var cellEle = excelPanel.querySelector(
+    getCellValue(rowNum, colNum) {
+      var cellEle = this.excelPanel.querySelector(
         ".excel-cell.excel-cell-row-" + rowNum + ".excel-cell-col-" + colNum
       );
-      if(cellEle) {
+      if (cellEle) {
         return cellEle.innerText;
       }
     },
-    getRowValues(rowNum){
+    getRowValues(rowNum) {
       var rowValues = [];
-        excelPanel
-          .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
-          .forEach((ele) => {
-            var colNum = ele.getAttribute("col-num");
-            if (!isNaN(colNum)) {
-              rowValues[colNum] = ele.innerText;
-            }
-          });
+      this.excelPanel
+        .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
+        .forEach((ele) => {
+          var colNum = ele.getAttribute("col-num");
+          if (!isNaN(colNum)) {
+            rowValues[colNum] = ele.innerText;
+          }
+        });
       return rowValues;
     },
     setSelectedBackgroundColor(backgroundColor) {
-      excelPanel.querySelectorAll(".background-color-set").forEach((ele) => {
-        ele.style.backgroundColor = "white";
-        ele.classList.remove("background-color-set");
-      });
-      excelPanel.querySelectorAll(".excel-cell.selected").forEach((ele) => {
-        ele.style.backgroundColor = backgroundColor;
-        ele.classList.add("background-color-set");
-      });
+      this.excelPanel
+        .querySelectorAll(".background-color-set")
+        .forEach((ele) => {
+          ele.style.backgroundColor = "white";
+          ele.classList.remove("background-color-set");
+        });
+      this.excelPanel
+        .querySelectorAll(".excel-cell.selected")
+        .forEach((ele) => {
+          ele.style.backgroundColor = backgroundColor;
+          ele.classList.add("background-color-set");
+        });
     },
     setRowBackgroundColor(rowNum, backgroundColor) {
-      excelPanel
+      this.excelPanel
         .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
         .forEach((ele) => {
           ele.style.backgroundColor = backgroundColor;
@@ -307,7 +282,7 @@ export default {
         });
     },
     setCellBackgroundColor(rowNum, colNum, backgroundColor) {
-      var cellEle = excelPanel.querySelector(
+      var cellEle = this.excelPanel.querySelector(
         ".excel-cell.excel-cell-row-" + rowNum + ".excel-cell-col-" + colNum
       );
       if (cellEle) {
@@ -316,7 +291,7 @@ export default {
       }
     },
     freezeCellAt(rowNum, colNum) {
-      excelPanel.querySelectorAll(".freeze").forEach((cellEle) => {
+      this.excelPanel.querySelectorAll(".freeze").forEach((cellEle) => {
         cellEle.classList.remove("freeze");
         var sColNum = cellEle.getAttribute("col-num");
         var sRowNum = cellEle.getAttribute("row-num");
@@ -336,13 +311,13 @@ export default {
 
       var top = 25;
       for (var ri = (this.firstRowIndex || 0) + 1; ri < rowNum; ri++) {
-        var cellEle = excelPanel.querySelector(
+        var cellEle = this.excelPanel.querySelector(
           ".excel-cell.excel-cell-row-" + ri + ".excel-cell-col-" + colNum
         );
         // console.info('zindex',cellEle.style.zIndex)
         var boundingClientRect = cellEle.getBoundingClientRect();
 
-        excelPanel
+        this.excelPanel
           .querySelectorAll(".excel-cell-row-" + ri)
           .forEach((cellEle) => {
             if (cellEle.classList.contains("excel-left-num")) {
@@ -359,11 +334,11 @@ export default {
       var left = 34;
       for (var ci = 1; ci < colNum; ci++) {
         // console.info("col freeze", ci, left);
-        var cellEle = excelPanel.querySelector(
+        var cellEle = this.excelPanel.querySelector(
           ".excel-cell.excel-cell-row-" + rowNum + ".excel-cell-col-" + ci
         );
         var boundingClientRect = cellEle.getBoundingClientRect();
-        excelPanel
+        this.excelPanel
           .querySelectorAll(".excel-cell-col-" + ci)
           .forEach((cellEle) => {
             if (cellEle.classList.contains("excel-head-th")) {
@@ -381,14 +356,14 @@ export default {
     excelClick(e) {
       var target = e.target;
       if (target.classList.contains("excel-head-th")) {
-        excelPanel.querySelectorAll(".selected").forEach((ele) => {
+        this.excelPanel.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
           ele.classList.remove("selected-col");
           ele.classList.remove("selected-row");
         });
         target.classList.add("selected");
         var colNum = target.getAttribute("col-num");
-        excelPanel
+        this.excelPanel
           .querySelectorAll(".excel-cell.excel-cell-col-" + colNum)
           .forEach((ele) => {
             ele.classList.add("selected");
@@ -396,7 +371,7 @@ export default {
           });
         this.$emit("on-col-select", colNum);
       } else if (target.classList.contains("excel-left-num")) {
-        excelPanel.querySelectorAll(".selected").forEach((ele) => {
+        this.excelPanel.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
           ele.classList.remove("selected-col");
           ele.classList.remove("selected-row");
@@ -405,7 +380,7 @@ export default {
         var rowNum = target.getAttribute("row-num");
 
         var selectRowValues = [];
-        excelPanel
+        this.excelPanel
           .querySelectorAll(".excel-cell.excel-cell-row-" + rowNum)
           .forEach((ele) => {
             var colNum = ele.getAttribute("col-num");
@@ -418,7 +393,7 @@ export default {
 
         this.$emit("on-row-select", rowNum, selectRowValues);
       } else if (target.classList.contains("excel-cell")) {
-        excelPanel.querySelectorAll(".selected").forEach((ele) => {
+        this.excelPanel.querySelectorAll(".selected").forEach((ele) => {
           ele.classList.remove("selected");
           ele.classList.remove("selected-col");
           ele.classList.remove("selected-row");
@@ -428,10 +403,10 @@ export default {
         var rowNum = target.getAttribute("row-num");
         var colNum = target.getAttribute("col-num");
 
-        excelPanel
+        this.excelPanel
           .querySelector("th.excel-cell-col-" + colNum)
           .classList.add("selected");
-        excelPanel
+        this.excelPanel
           .querySelector("td.excel-cell-row-" + rowNum)
           .classList.add("selected");
 
@@ -453,7 +428,7 @@ export default {
           });
           var sheetName = workbook.SheetNames[0];
           if (sheetName) {
-            renderWorkbookSheet(
+            that.renderWorkbookSheet(
               workbook,
               sheetName,
               that.firstRowIndex,
@@ -478,7 +453,7 @@ export default {
         });
         var sheetName = workbook.SheetNames[0];
         if (sheetName) {
-          renderWorkbookSheet(
+          that.renderWorkbookSheet(
             workbook,
             sheetName,
             that.firstRowIndex,
@@ -491,12 +466,39 @@ export default {
         throw "excel-view 不能重复打开";
       }
     },
+    renderWorkbookSheet(workbook, sheetName, firstRowIndex, minColCounts) {
+      var worksheet = workbook.Sheets[sheetName];
+      // console.info("renderWorkbookSheet", worksheet);
+      var defaultRange = worksheet["!ref"];
+      var lastCellPosition = defaultRange.split(":")[1];
+      var lastCellPositionMatchInfo = lastCellPosition.match(/(\D+)(\d+)/);
+      // console.info("lastCellPositionMatchInfo", lastCellPositionMatchInfo);
+      var merges = worksheet["!merges"];
+      var sheetDatas = XLSX.utils.sheet_to_json(worksheet, {
+        raw: false,
+        header: 1,
+      });
+      // console.info("workbook sheet data", sheetDatas);
+      var tableElement = this.excelPanel.querySelector(".excel-table");
+
+      var maxColRange = parseCharsTo10(lastCellPositionMatchInfo[1]);
+      if (!isNaN(minColCounts) && minColCounts > maxColRange) {
+        maxColRange = minColCounts;
+      }
+      // console.info("maxColRange", maxColRange);
+      renderSheetAt(
+        tableElement,
+        maxColRange,
+        sheetDatas,
+        transformMerges(merges),
+        firstRowIndex
+      );
+    },
   },
 };
 </script>
 
 <style lang="scss">
-
 .excel-panel .excel-table {
   // font-size: 1.2em;
   // border-collapse: collapse;
@@ -529,7 +531,7 @@ export default {
         height: 0;
         left: 8px;
         top: 7px;
-        border-bottom: 15px solid #B8B8B8;
+        border-bottom: 15px solid #b8b8b8;
         border-left: 20px solid transparent;
       }
       th.excel-head-th {

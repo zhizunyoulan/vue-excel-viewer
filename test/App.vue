@@ -16,6 +16,21 @@
       @on-before-open="beforeOpen"
       @on-after-open="afterOpen"
     />
+
+    <excel-viewer
+      ref="excelSecondViewer"
+      :height="500"
+      :first-row-index="firstRowIndex"
+      :min-col-counts="5"
+      :border-collapse="false"
+      @on-reach-top="reachTop"
+      @on-reach-bottom="reachBottom"
+      @on-row-select="onRowSelect"
+      @on-col-select="onColSelect"
+      @on-cell-select="onCellSelect"
+      @on-before-open="beforeOpen"
+      @on-after-open="afterOpen"
+    />
   </div>
 </template>
 
@@ -46,7 +61,7 @@ export default {
     onRowSelect(index, selectRowValues) {//行选择的事件 on row select
       console.info("row select", index, selectRowValues);
       //设置行的背景颜色 set row background-color
-      this.$refs.excelViewer.setSelectedBackgroundColor('red');
+      // this.$refs.excelViewer.setSelectedBackgroundColor('red');
     },
     onColSelect(index) {//列选择事件 on column select
       console.info("col select", index);
