@@ -1,6 +1,6 @@
 {
     "name": "vue-excel-viewer",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "private": false,
     "files": [
         "lib"
@@ -49,5 +49,6 @@
         "> 1%",
         "last 2 versions",
         "not dead"
-    ]
+    ],
+    "keywords": ["excel","xlsx", "viewer","preview","office"]
 }
