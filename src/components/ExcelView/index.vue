@@ -56,7 +56,7 @@ function renderSheetAt(
   maxColRange,
   dataArray,
   merges,
-  firstRowIndex
+  firstRowNum
 ) {
   var tableHeadElement = domElement.querySelector("thead");
   var tableHeadTrEle = document.createElement("tr");
@@ -78,13 +78,13 @@ function renderSheetAt(
   }
   var tableBodyElement = domElement.querySelector("tbody");
   var invalidCells = {};
-  if (isNaN(firstRowIndex) || firstRowIndex < 0) {
-    firstRowIndex = 0;
+  if (isNaN(firstRowNum) || firstRowNum < 1) {
+    firstRowNum = 1;
   }
-  // console.info('firstRowIndex',firstRowIndex)
-  for (var ri = firstRowIndex; ri < dataArray.length; ri++) {
-    var rowNum = ri + 1;
+  // console.info('firstRowNum',firstRowNum)
+  for (var ri = 0; ri < dataArray.length; ri++) {
     var row = dataArray[ri];
+    var rowNum = ri + firstRowNum;
     var tr = document.createElement("tr");
     tr.setAttribute("row-num", rowNum);
     tr.classList.add("excel-row");
@@ -191,7 +191,7 @@ export default {
       type: Number | String,
       default: 500,
     },
-    firstRowIndex: {
+    firstRowNum: {
       type: Number,
     },
     minColCounts: {
@@ -310,19 +310,19 @@ export default {
       });
 
       var top = 25;
-      for (var ri = (this.firstRowIndex || 0) + 1; ri < rowNum; ri++) {
+      for (var rowNumInner = (this.firstRowNum || 1); rowNumInner < rowNum; rowNumInner++) {
         var cellEle = this.excelPanel.querySelector(
-          ".excel-cell.excel-cell-row-" + ri + ".excel-cell-col-" + colNum
+          ".excel-cell.excel-cell-row-" + rowNumInner
         );
-        // console.info('zindex',cellEle.style.zIndex)
+        console.info(".excel-cell.excel-cell-row-" + rowNumInner + ".excel-cell-col-1", cellEle)
         var boundingClientRect = cellEle.getBoundingClientRect();
 
         this.excelPanel
-          .querySelectorAll(".excel-cell-row-" + ri)
+          .querySelectorAll(".excel-cell-row-" + rowNumInner)
           .forEach((cellEle) => {
             if (cellEle.classList.contains("excel-left-num")) {
               cellEle.style.zIndex = 1001;
-              // console.info("row zIndex", ri, cellEle, 1001);
+              // console.info("row zIndex", rowNumInner, cellEle, 1001);
             }
 
             cellEle.classList.add("freeze");
@@ -335,7 +335,7 @@ export default {
       for (var ci = 1; ci < colNum; ci++) {
         // console.info("col freeze", ci, left);
         var cellEle = this.excelPanel.querySelector(
-          ".excel-cell.excel-cell-row-" + rowNum + ".excel-cell-col-" + ci
+          ".excel-cell.excel-cell-col-" + ci
         );
         var boundingClientRect = cellEle.getBoundingClientRect();
         this.excelPanel
@@ -431,7 +431,7 @@ export default {
             that.renderWorkbookSheet(
               workbook,
               sheetName,
-              that.firstRowIndex,
+              that.firstRowNum,
               that.minColCounts
             );
             that.$emit("on-after-open");
@@ -456,7 +456,7 @@ export default {
           that.renderWorkbookSheet(
             workbook,
             sheetName,
-            that.firstRowIndex,
+            that.firstRowNum,
             that.minColCounts
           );
           that.$emit("on-after-open");
@@ -466,7 +466,7 @@ export default {
         throw "excel-view 不能重复打开";
       }
     },
-    renderWorkbookSheet(workbook, sheetName, firstRowIndex, minColCounts) {
+    renderWorkbookSheet(workbook, sheetName, firstRowNum, minColCounts) {
       var worksheet = workbook.Sheets[sheetName];
       // console.info("renderWorkbookSheet", worksheet);
       var defaultRange = worksheet["!ref"];
@@ -491,7 +491,7 @@ export default {
         maxColRange,
         sheetDatas,
         transformMerges(merges),
-        firstRowIndex
+        firstRowNum
       );
     },
   },
@@ -523,17 +523,17 @@ export default {
         left: 0;
         z-index: 1001;
       }
-      th.excel-angle::after {
-        content: "";
-        position: sticky;
-        display: block;
-        width: 0;
-        height: 0;
-        left: 8px;
-        top: 7px;
-        border-bottom: 15px solid #b8b8b8;
-        border-left: 20px solid transparent;
-      }
+      // th.excel-angle::after {
+      //   content: "";
+      //   position: sticky;
+      //   display: block;
+      //   width: 0;
+      //   height: 0;
+      //   left: 8px;
+      //   top: 7px;
+      //   border-bottom: 15px solid #b8b8b8;
+      //   border-left: 20px solid transparent;
+      // }
       th.excel-head-th {
         position: sticky;
         top: 0;
@@ -541,6 +541,7 @@ export default {
         border-right: 1px solid #bbbbbb;
         background-color: #e8e8e8;
         background-clip: padding-box;
+        white-space: nowrap;
         z-index: 1000;
       }
 

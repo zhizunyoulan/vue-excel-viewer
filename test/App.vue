@@ -5,7 +5,7 @@
     <excel-viewer
       ref="excelViewer"
       :height="500"
-      :first-row-index="firstRowIndex"
+      :first-row-num="firstRowNum"
       :min-col-counts="5"
       :border-collapse="false"
       @on-reach-top="reachTop"
@@ -17,10 +17,10 @@
       @on-after-open="afterOpen"
     />
 
-    <excel-viewer
+    <!-- <excel-viewer
       ref="excelSecondViewer"
       :height="500"
-      :first-row-index="firstRowIndex"
+      :first-row-num="firstRowNum"
       :min-col-counts="5"
       :border-collapse="false"
       @on-reach-top="reachTop"
@@ -30,7 +30,7 @@
       @on-cell-select="onCellSelect"
       @on-before-open="beforeOpen"
       @on-after-open="afterOpen"
-    />
+    /> -->
   </div>
 </template>
 
@@ -40,7 +40,7 @@ export default {
   name: "App",
   data() {
     return {
-      firstRowIndex: 2
+      firstRowNum: 20
     };
   },
   methods: {
@@ -56,19 +56,19 @@ export default {
     afterOpen() {//文件打开后的事件 on after open
       console.info("excel after open");
       this.$refs.excelViewer.setRowBackgroundColor(5,'red');
-      this.$refs.excelViewer.freezeCellAt(5, 2);
+      this.$refs.excelViewer.freezeCellAt(25, 2);
     },
-    onRowSelect(index, selectRowValues) {//行选择的事件 on row select
-      console.info("row select", index, selectRowValues);
+    onRowSelect(rowNum, selectRowValues) {//行选择的事件 on row select
+      console.info("row select", rowNum, selectRowValues);
       //设置行的背景颜色 set row background-color
       // this.$refs.excelViewer.setSelectedBackgroundColor('red');
     },
-    onColSelect(index) {//列选择事件 on column select
-      console.info("col select", index);
+    onColSelect(colNum) {//列选择事件 on column select
+      console.info("col select", colNum);
     },
     onCellSelect(rowNum, colNum, value) {//单元格选择的事件 on cell select
       //设置背景颜色 set backgroundColor 
-      // this.$refs.excelViewer.setCellBackgroundColor(rowNum, colNum, 'red');
+      this.$refs.excelViewer.setCellBackgroundColor(rowNum, colNum, 'red');
 
       var rowValues = this.$refs.excelViewer.getRowValues(rowNum);
       console.info('rowValues', rowValues)

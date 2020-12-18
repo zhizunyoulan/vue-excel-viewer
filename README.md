@@ -12,6 +12,7 @@ npm i @uublue/vue-excel-viewer
 
 
 ## Example
+### 基本用法
 ```javascript
 import VueExcelViewer from '@uublue/vue-excel-viewer'
 import '@uublue/vue-excel-viewer/lib/vue-excel-viewer.css'
@@ -27,7 +28,7 @@ Vue.use(VueExcelViewer)
     <excel-viewer
       ref="excelViewer"
       :height="300"
-      :first-row-index="firstRowIndex"
+      :first-row-num="firstRowNum"
       :min-col-counts="5"
       @on-reach-top="reachTop"
       @on-reach-bottom="reachBottom"
@@ -45,7 +46,7 @@ export default {
   name: "App",
   data() {
     return {
-      firstRowIndex: 2
+      firstRowNum: 2
     };
   },
   methods: {
@@ -62,23 +63,23 @@ export default {
       console.info("excel after open");
       this.$refs.excelViewer.setRowBackgroundColor(5,'red');
     },
-    onRowSelect(index, selectRowValues) {//行选择的事件 on row select
-      console.info("row select", index, selectRowValues);
+    onRowSelect(rowNum, selectRowValues) {//行选择的事件 on row select
+      console.info("row select", rowNum, selectRowValues);
       //设置行的背景颜色 set row background-color
       this.$refs.excelViewer.setSelectedBackgroundColor('red');
     },
-    onColSelect(index) {//列选择事件 on column select
-      console.info("col select", index);
+    onColSelect(colNum) {//列选择事件 on column select
+      console.info("col select", colNum);
     },
-    onCellSelect(rowIndex, colIndex, value) {//单元格选择的事件 on cell select
+    onCellSelect(rowNum, colNum, value) {//单元格选择的事件 on cell select
       //设置背景颜色 set backgroundColor 
-      this.$refs.excelViewer.setCellBackgroundColor(rowIndex, colIndex, 'red');
+      this.$refs.excelViewer.setCellBackgroundColor(rowNum, colNum, 'red');
       //冻结窗格 freeze at cell
-      this.$refs.excelViewer.freezeCellAt(rowIndex, colIndex);
+      this.$refs.excelViewer.freezeCellAt(rowNum, colNum);
       if (value) {
-        console.info("cell select", rowIndex, colIndex, value);
+        console.info("cell select", rowNum, colNum, value);
       } else {
-        console.info("cell select， value empty", rowIndex, colIndex);
+        console.info("cell select， value empty", rowNum, colNum);
       }
     },
     reachTop() {//滚动到顶部的事件 on reach top
@@ -90,4 +91,24 @@ export default {
   },
 };
 </script>
+```
+
+### 从文件流获取excel
+```javascript
+        axios
+          .get(`/file`, {
+            responseType: "blob",
+          })
+          .then((res) => {
+            let blob = res.data;
+            let reader = new FileReader();
+            var self = this
+            reader.onload = (e) => {
+              self.$refs.excelView.openExcelData(e.target.result)
+            };
+            reader.readAsBinaryString(blob);
+          })
+          .catch((error) => {
+            console.error("error", error);
+          });
 ```
