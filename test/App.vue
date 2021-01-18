@@ -40,7 +40,7 @@ export default {
   name: "App",
   data() {
     return {
-      firstRowNum: 20
+      firstRowNum: 2
     };
   },
   methods: {
@@ -55,8 +55,8 @@ export default {
     },
     afterOpen() {//文件打开后的事件 on after open
       console.info("excel after open");
-      this.$refs.excelViewer.setRowBackgroundColor(5,'red');
-      this.$refs.excelViewer.freezeCellAt(25, 2);
+      this.$refs.excelViewer.setRowBackgroundColor(2,'red');
+      this.$refs.excelViewer.freezeCellAt(3, 1);
     },
     onRowSelect(rowNum, selectRowValues) {//行选择的事件 on row select
       console.info("row select", rowNum, selectRowValues);

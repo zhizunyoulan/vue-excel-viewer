@@ -468,17 +468,22 @@ export default {
     },
     renderWorkbookSheet(workbook, sheetName, firstRowNum, minColCounts) {
       var worksheet = workbook.Sheets[sheetName];
-      // console.info("renderWorkbookSheet", worksheet);
+      console.info("renderWorkbookSheet", worksheet);
       var defaultRange = worksheet["!ref"];
+      console.info('range:',defaultRange)
       var lastCellPosition = defaultRange.split(":")[1];
       var lastCellPositionMatchInfo = lastCellPosition.match(/(\D+)(\d+)/);
       // console.info("lastCellPositionMatchInfo", lastCellPositionMatchInfo);
       var merges = worksheet["!merges"];
       var sheetDatas = XLSX.utils.sheet_to_json(worksheet, {
         raw: false,
+        range: 0,
+        defval: null,
         header: 1,
+        blankrows: null,
       });
-      // console.info("workbook sheet data", sheetDatas);
+
+      console.info("workbook sheet data", sheetDatas);
       var tableElement = this.excelPanel.querySelector(".excel-table");
 
       var maxColRange = parseCharsTo10(lastCellPositionMatchInfo[1]);
